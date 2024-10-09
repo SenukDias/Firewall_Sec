@@ -57,7 +57,7 @@
     "ignore.virus.scanning.warn.message": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Python.firewall_main (1)">
+  <component name="RunManager" selected="Python.firewall_main">
     <configuration name="firewall_main (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Firewall" />
       <option name="ENV_FILES" value="" />
