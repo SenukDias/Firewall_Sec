@@ -6,15 +6,21 @@ import logging
 # Suppress Scapy warnings
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 
-def start_sniffing(rules):
+def start_sniffing(rules, iface="ens160"):
     def process_packet(packet):
-        packet_info = {
-            'src_ip': packet[0][1].src,
-            'dst_ip': packet[0][1].dst,
-            'protocol': packet[0][1].proto
-        }
-        process_ip_packet(packet_info, rules)
+        if packet.haslayer('IP'):
+            packet_info = {
+                'src_ip': packet['IP'].src,
+                'dst_ip': packet['IP'].dst,
+                'protocol': packet['IP'].proto
+            }
+            process_ip_packet(packet_info, rules)
+        else:
+            logging.warning("Packet does not have an IP layer")
 
-    # Specify network interface and enable promiscuous mode
-    sniff(filter="ip", iface="ens160", prn=process_packet, promisc=True)
+    try:
+        # Specify network interface and enable promiscuous mode
+        sniff(filter="ip", iface=iface, prn=process_packet, promisc=True)
+    except Exception as e:
+        logging.error(f"Error occurred while sniffing: {e}")
 
