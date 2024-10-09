@@ -11,13 +11,10 @@ def start_sniffing(rules, iface="ens160"):
     def process_packet(packet):
         if packet.haslayer('IP'):
             raw_packet = bytes(packet)
-            logging.debug(f"Raw packet: {raw_packet}")
             if not process_ip_packet(raw_packet, rules):
-                logging.info(f"Packet blocked: {raw_packet}")
-                # Drop the packet by not forwarding it
+                logging.info(f"Packet blocked")
             else:
-                logging.info(f"Packet allowed: {raw_packet}")
-                # Forward the packet if necessary
+                logging.info(f"Packet allowed")
         else:
             logging.warning("Packet does not have an IP layer")
 
@@ -28,7 +25,7 @@ def start_sniffing(rules, iface="ens160"):
         logging.error(f"Error occurred while sniffing: {e}")
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     with open('firewall_rules.json', 'r') as f:
         rules = json.load(f)
     start_sniffing(rules)
