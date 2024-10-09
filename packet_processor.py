@@ -1,6 +1,7 @@
 # packet_processor.py
 import struct
 import socket
+import logging
 from rule_manager import check_rule
 from logger import log_packet
 
@@ -30,7 +31,7 @@ def process_ip_packet(packet, rules):
     elif protocol == ICMP:
         process_icmp_packet(packet_info)
 
-    action = check_rule(packet_info, rules)
+    action = process_packet_info(packet_info, rules)
     log_packet(packet_info, action)
 
     return action == "ALLOW"
@@ -50,3 +51,25 @@ def process_udp_packet(segment, packet_info):
 
 def process_icmp_packet(packet_info):
     packet_info['protocol'] = 'ICMP'
+
+
+def process_packet_info(packet_info, rules):
+    src_ip = packet_info['src_ip']
+    dst_ip = packet_info['dst_ip']
+    protocol = packet_info['protocol']
+    port = packet_info.get('port', None)
+
+    for rule in rules:
+        if (rule['source'] == 'ANY' or rule['source'] == src_ip) and \
+           (rule['destination'] == 'ANY' or rule['destination'] == dst_ip) and \
+           (rule['protocol'] == 'ANY' or rule['protocol'] == protocol) and \
+           (rule['port'] == 'ANY' or rule['port'] == port):
+            if rule['action'] == 'BLOCK':
+                logging.info(f"Blocking packet: {packet_info}")
+                return "BLOCK"  # Block the packet
+            elif rule['action'] == 'ALLOW':
+                logging.info(f"Allowing packet: {packet_info}")
+                return "ALLOW"  # Allow the packet
+
+    logging.info(f"No matching rule found, allowing packet: {packet_info}")
+    return "ALLOW"  # Default action is to allow the packet
