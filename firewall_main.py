@@ -1,5 +1,7 @@
 # firewall_main.py
 import argparse
+import logging
+import json
 from packet_sniffer import start_sniffing
 from rule_manager import load_rules
 from nat_manager import enable_nat, disable_nat
@@ -7,6 +9,26 @@ from vpn_manager import start_vpn, stop_vpn
 
 RULES_FILE = "firewall_rules.json"
 
+def setup_logging():
+    # Create a custom logger
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    # Create handlers
+    c_handler = logging.StreamHandler()
+    f_handler = logging.FileHandler('firewall.log')
+    c_handler.setLevel(logging.DEBUG)
+    f_handler.setLevel(logging.DEBUG)
+
+    # Create formatters and add them to handlers
+    c_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    c_handler.setFormatter(c_format)
+    f_handler.setFormatter(f_format)
+
+    # Add handlers to the logger
+    logger.addHandler(c_handler)
+    logger.addHandler(f_handler)
 
 def main():
     parser = argparse.ArgumentParser(description="Firewall CLI")
@@ -30,10 +52,11 @@ def main():
         stop_vpn()
         print("VPN stopped")
     else:
-        rules = load_rules(RULES_FILE)
+        with open(RULES_FILE, 'r') as f:
+            rules = json.load(f)
         print("Starting firewall...")
         start_sniffing(rules)
 
-
 if __name__ == "__main__":
+    setup_logging()
     main()
