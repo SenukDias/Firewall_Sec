@@ -2,8 +2,7 @@
 import struct
 import socket
 import logging
-from rule_manager import check_rule
-from logger import log_packet
+import os
 
 TCP = 6
 UDP = 17
@@ -23,21 +22,28 @@ def process_ip_packet(packet, rules):
         'port': None
     }
 
-    logging.debug(f"Packet info: {packet_info}")
+    # Extract port if the protocol is TCP or UDP
+    if protocol == TCP:  # TCP
+        tcp_header = struct.unpack('!HHLLBBHHH', packet[20:40])
+        packet_info['port'] = tcp_header[1]  # Destination port
+    elif protocol == UDP:  # UDP
+        udp_header = struct.unpack('!HHHH', packet[20:28])
+        packet_info['port'] = udp_header[1]  # Destination port
+
+    logging.info(f"Processing packet: {packet_info}")
     for rule in rules:
-        logging.debug(f"Checking rule: {rule}")
         if (rule['source'] == 'ANY' or rule['source'] == src_ip) and \
            (rule['destination'] == 'ANY' or rule['destination'] == dst_ip) and \
-           (rule['protocol'] == 'ANY' or rule['protocol'] == protocol) and \
+           (rule['protocol'] == 'ANY' or rule['protocol'] == str(protocol)) and \
            (rule['port'] == 'ANY' or rule['port'] == packet_info['port']):
             if rule['action'] == 'BLOCK':
                 logging.info(f"Blocking packet: {packet_info}")
+                # Add iptables rule to drop the packet
+                os.system(f"iptables -A INPUT -s {src_ip} -d {dst_ip} -j DROP")
                 return False  # Block the packet
             elif rule['action'] == 'ALLOW':
-                logging.info(f"Allowing packet: {packet_info}")
+                logging.info(f"Packet allowed: {packet_info}")
                 return True  # Allow the packet
 
-    logging.info(f"No matching rule found, allowing packet: {packet_info}")
-    return True  # Default action is to allow the packet
     logging.info(f"No matching rule found, allowing packet: {packet_info}")
     return True  # Default action is to allow the packet

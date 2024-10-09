@@ -1,4 +1,3 @@
-# packet_sniffer.py
 from scapy.all import sniff
 from packet_processor import process_ip_packet
 import logging
