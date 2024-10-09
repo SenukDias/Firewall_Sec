@@ -2,15 +2,8 @@
     {
         "source": "ANY",
         "destination": "ANY",
-        "protocol": "TCP",
-        "port": "80",
-        "action": "BLOCK"
-    },
-    {
-        "source": "ANY",
-        "destination": "ANY",
-        "protocol": "TCP",
-        "port": "443",
+        "protocol": "ANY",
+        "port": "ANY",
         "action": "BLOCK"
     }
 ]
