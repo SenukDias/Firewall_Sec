@@ -1,21 +1,20 @@
 # packet_sniffer.py
-import socket
+from scapy.all import sniff
 from packet_processor import process_ip_packet
+import logging
 
+# Suppress Scapy warnings
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 
 def start_sniffing(rules):
-    # Raw socket for sniffing packets
-    sniffer = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IP)
-    sniffer.bind(("0.0.0.0", 0))
+    def process_packet(packet):
+        packet_info = {
+            'src_ip': packet[0][1].src,
+            'dst_ip': packet[0][1].dst,
+            'protocol': packet[0][1].proto
+        }
+        process_ip_packet(packet_info, rules)
 
-    # Capture all incoming packets
-    sniffer.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+    # Specify network interface and enable promiscuous mode
+    sniff(filter="ip", iface="ens160", prn=process_packet, promisc=True)
 
-    print("Sniffing packets...")
-
-    while True:
-        packet, addr = sniffer.recvfrom(65565)
-        if process_ip_packet(packet, rules):
-            print(f"Allowed packet from {addr}")
-        else:
-            print(f"Blocked packet from {addr}")

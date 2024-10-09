@@ -1,7 +1,7 @@
 [
     {
-        "src_ip": "192.168.1.100",
-        "dst_ip": "ANY",
+        "source": "ANY",
+        "destination": "ANY",
         "protocol": "TCP",
         "port": "80",
         "action": "BLOCK"

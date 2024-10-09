@@ -1,0 +1,17 @@
+[
+    {
+        "source": "ANY",
+        "destination": "ANY",
+        "protocol": "TCP",
+        "port": "80",
+        "action": "BLOCK"
+    },
+    {
+        "source": "192.168.1.1",
+        "destination": "ANY",
+        "protocol": "UDP",
+        "port": "53",
+        "action": "ALLOW"
+    }
+]
+

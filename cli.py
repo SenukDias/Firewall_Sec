@@ -1,21 +1,23 @@
-# cli.py
 import sys
+import json  # Import the json module
 from rule_manager import load_rules
 
 RULES_FILE = "firewall_rules.json"
 
-def add_rule(src_ip, dst_ip, protocol, port, action):
-    rules = load_rules(RULES_FILE)
+def add_rule(source, destination, protocol, port, action):
+    rules = load_rules(RULES_FILE)  # Load existing rules
     new_rule = {
-        "src_ip": src_ip,
-        "dst_ip": dst_ip,
-        "protocol": protocol,
-        "port": port,
-        "action": action
+        'source': source,
+        'destination': destination,
+        'protocol': protocol,
+        'port': port,
+        'action': action
     }
-    rules.append(new_rule)
+    rules.append(new_rule)  # Add new rule to the existing rules
+
+    # Save updated rules back to the file
     with open(RULES_FILE, 'w') as file:
-        json.dump(rules, file, indent=4)
+        json.dump(rules, file, indent=4)  # Write updated rules
     print(f"Added rule: {new_rule}")
 
 def remove_rule(index):
@@ -30,6 +32,9 @@ def remove_rule(index):
 
 def list_rules():
     rules = load_rules(RULES_FILE)
+    if not rules:  # Check if there are no rules
+        print("No rules found.")
+        return
     for i, rule in enumerate(rules):
         print(f"{i}: {rule}")
 
@@ -50,3 +55,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
