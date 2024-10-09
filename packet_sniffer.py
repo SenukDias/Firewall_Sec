@@ -1,20 +1,21 @@
 # packet_sniffer.py
 import socket
-import struct
+from packet_processor import process_ip_packet
 
 
-def sniff_packets():
-    # Create a raw socket to listen on all interfaces
-    raw_socket = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0003))
+def start_sniffing(rules):
+    # Raw socket for sniffing packets
+    sniffer = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IP)
+    sniffer.bind(("0.0.0.0", 0))
+
+    # Capture all incoming packets
+    sniffer.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+
+    print("Sniffing packets...")
 
     while True:
-        # Receive packets
-        raw_packet = raw_socket.recvfrom(65565)[0]
-        # Parse the Ethernet frame
-        ethernet_header = raw_packet[0:14]
-        eth_header = struct.unpack("!6s6sH", ethernet_header)
-        eth_protocol = socket.ntohs(eth_header[2])
-
-        # Handle only IP packets (IPv4)
-        if eth_protocol == 8:
-            process_ip_packet(raw_packet[14:])
+        packet, addr = sniffer.recvfrom(65565)
+        if process_ip_packet(packet, rules):
+            print(f"Allowed packet from {addr}")
+        else:
+            print(f"Blocked packet from {addr}")
