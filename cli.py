@@ -9,7 +9,7 @@ def add_rule(source, destination, protocol, port, action):
     new_rule = {
         'source': source,
         'destination': destination,
-        'protocol': protocol,
+        'protocol': protocol.upper(),  # Convert protocol to uppercase
         'port': port,
         'action': action
     }

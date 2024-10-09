@@ -19,7 +19,7 @@ def process_ip_packet(packet, rules):
     packet_info = {
         'src_ip': src_ip,
         'dst_ip': dst_ip,
-        'protocol': protocol,
+        'protocol': str(protocol),  # Convert protocol to string
         'port': None
     }
 
