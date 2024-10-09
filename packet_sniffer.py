@@ -13,8 +13,10 @@ def start_sniffing(rules, iface="ens160"):
             raw_packet = bytes(packet)
             if not process_ip_packet(raw_packet, rules):
                 logging.info(f"Packet blocked")
+                # Drop the packet by not forwarding it
             else:
                 logging.info(f"Packet allowed")
+                # Forward the packet if necessary
         else:
             logging.warning("Packet does not have an IP layer")
 
